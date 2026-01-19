@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fetch API + Hiển Thị Dữ Liệu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+        }
+        
+        .error {
+            color: red;
+            text-align: center;
+        }
+        
+        .post {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        
+        #postDetails {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Danh sách bài viết</h1>
+
+    <div id="loading" class="loading" style="display: none;">Đang tải...</div>
+    <div id="error" class="error" style="display: none;">
+        <p>Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+        <button onclick="fetchPosts()">Thử lại</button>
+    </div>
+
+    <div id="postList"></div>
+
+    <div id="postDetails"></div>
+
+    <script>
+        const postList = document.getElementById("postList");
+        const postDetails = document.getElementById("postDetails");
+        const loading = document.getElementById("loading");
+        const error = document.getElementById("error");
+
+        const API_URL = "https://jsonplaceholder.typicode.com/posts";
+        const CACHE_KEY = "postsCache";
+        const CACHE_TIME_KEY = "cacheTime";
+
+        // Fetch dữ liệu từ API hoặc sessionStorage
+        async function fetchPosts() {
+            // Hiển thị loading khi bắt đầu
+            loading.style.display = "block";
+            error.style.display = "none";
+            postList.innerHTML = "";
+
+            const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
+            const currentTime = Date.now();
+
+            // Kiểm tra dữ liệu cache trong sessionStorage (còn hiệu lực 5 phút)
+            if (cacheTime && currentTime - cacheTime < 5 * 60 * 1000) {
+                const cachedPosts = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+                displayPosts(cachedPosts);
+            } else {
+                // Fetch dữ liệu từ API nếu không có cache hợp lệ
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error("Error fetching data");
+                    const posts = await response.json();
+
+                    // Lưu vào sessionStorage và cập nhật thời gian cache
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(posts));
+                    sessionStorage.setItem(CACHE_TIME_KEY, currentTime.toString());
+
+                    displayPosts(posts);
+                } catch (err) {
+                    // Hiển thị lỗi nếu có
+                    loading.style.display = "none";
+                    error.style.display = "block";
+                }
+            }
+        }
+
+        // Hiển thị danh sách bài viết
+        function displayPosts(posts) {
+            loading.style.display = "none";
+            postList.innerHTML = posts
+                .map(post => `
+          <div class="post" onclick="viewPostDetails(${post.id})">
+            <h3>${post.title}</h3>
+            <p>${post.body.substring(0, 100)}...</p>
+          </div>
+        `)
+                .join("");
+        }
+
+        // Hiển thị chi tiết bài viết
+        async function viewPostDetails(postId) {
+            postDetails.innerHTML = "";
+            const cachedPosts = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+            const post = cachedPosts.find(p => p.id === postId);
+
+            if (post) {
+                postDetails.innerHTML = `
+          <h2>${post.title}</h2>
+          <p>${post.body}</p>
+        `;
+            }
+        }
+
+        // Khi trang tải, gọi hàm fetchPosts
+        window.onload = fetchPosts;
+    </script>
+
+</body>
+
+</html>

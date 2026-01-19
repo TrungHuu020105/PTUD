@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đếm Ký Tự và Giới Hạn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 8px;
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Đếm Ký Tự</h2>
+    <textarea id="textarea" placeholder="Nhập văn bản ở đây..."></textarea>
+    <div id="status" class="status">Bạn đã nhập 0/200 ký tự</div>
+
+    <script>
+        const textarea = document.getElementById("textarea");
+        const status = document.getElementById("status");
+
+        // Hàm update UI sau khi xử lý debounce
+        function updateCharacterCount() {
+            const inputText = textarea.value;
+            const maxLength = 200;
+            const length = inputText.length;
+
+            // Cắt chuỗi nếu dài hơn 200 ký tự
+            if (length > maxLength) {
+                textarea.value = inputText.slice(0, maxLength);
+            }
+
+            // Cập nhật số ký tự
+            const newLength = textarea.value.length;
+            status.textContent = `Bạn đã nhập ${newLength}/${maxLength} ký tự`;
+
+            // Thêm class error nếu quá 200 ký tự
+            if (newLength > maxLength) {
+                status.classList.add("error");
+            } else {
+                status.classList.remove("error");
+            }
+        }
+
+        // Hàm debounce (chờ 500ms sau khi ngừng gõ)
+        let debounceTimer;
+
+        function debounce(fn, delay) {
+            return function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fn, delay);
+            };
+        }
+
+        // Thêm sự kiện cho textarea với debounce
+        textarea.addEventListener("input", debounce(updateCharacterCount, 300));
+    </script>
+
+</body>
+
+</html>

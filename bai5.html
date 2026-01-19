@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bộ Lọc & Tìm Kiếm Sản Phẩm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        .product {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        
+        select,
+        input {
+            padding: 8px;
+            margin: 5px;
+        }
+        
+        .product-list {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Tìm Kiếm Sản Phẩm</h2>
+
+    <!-- Tìm kiếm -->
+    <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." />
+
+    <!-- Lọc theo danh mục -->
+    <select id="categoryFilter">
+    <option value="">Tất cả danh mục</option>
+    <option value="Electronics">Điện tử</option>
+    <option value="Clothing">Quần áo</option>
+    <option value="Furniture">Nội thất</option>
+  </select>
+
+    <!-- Sắp xếp theo giá -->
+    <select id="priceSort">
+    <option value="asc">Sắp xếp theo giá (tăng dần)</option>
+    <option value="desc">Sắp xếp theo giá (giảm dần)</option>
+  </select>
+
+    <!-- Danh sách sản phẩm -->
+    <div id="productList" class="product-list"></div>
+
+    <script>
+        // Giả lập danh sách sản phẩm
+        const products = [{
+                name: 'Laptop Dell',
+                category: 'Electronics',
+                price: 1000
+            }, {
+                name: 'Áo Thun Nam',
+                category: 'Clothing',
+                price: 20
+            }, {
+                name: 'Bàn Làm Việc',
+                category: 'Furniture',
+                price: 150
+            }, {
+                name: 'Smartphone Samsung',
+                category: 'Electronics',
+                price: 500
+            }, {
+                name: 'Áo Khoác Nữ',
+                category: 'Clothing',
+                price: 40
+            }, {
+                name: 'Máy Tính Bảng',
+                category: 'Electronics',
+                price: 300
+            },
+            // ... thêm đến 50 sản phẩm
+        ];
+
+        // Hàm lọc theo điều kiện tìm kiếm, danh mục và giá
+        function filterProducts() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const sortOrder = document.getElementById('priceSort').value;
+
+            // Lọc sản phẩm theo tên và danh mục
+            let filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchQuery);
+                const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sắp xếp sản phẩm theo giá
+            if (sortOrder === 'asc') {
+                filteredProducts.sort((a, b) => a.price - b.price);
+            } else if (sortOrder === 'desc') {
+                filteredProducts.sort((a, b) => b.price - a.price);
+            }
+
+            renderProducts(filteredProducts, searchQuery);
+        }
+
+        // Hàm render danh sách sản phẩm
+        function renderProducts(productsToRender, searchQuery) {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = ''; // Xóa danh sách cũ
+
+            // Render từng sản phẩm
+            productsToRender.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
+                const productName = highlightSearchText(product.name, searchQuery);
+                productElement.innerHTML = `
+          <h4>${productName}</h4>
+          <p>Danh mục: ${product.category}</p>
+          <p>Giá: $${product.price}</p>
+        `;
+                productList.appendChild(productElement);
+            });
+        }
+
+        // Hàm highlight từ tìm kiếm trong tên sản phẩm
+        function highlightSearchText(text, searchQuery) {
+            if (!searchQuery) return text;
+            const regex = new RegExp(`(${searchQuery})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Gắn các sự kiện cho ô tìm kiếm, dropdown và sắp xếp
+        document.getElementById('searchInput').addEventListener('input', filterProducts);
+        document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+        document.getElementById('priceSort').addEventListener('change', filterProducts);
+
+        // Khởi tạo danh sách sản phẩm ban đầu
+        filterProducts();
+    </script>
+
+</body>
+
+</html>

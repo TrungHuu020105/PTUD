@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Infinite Scroll</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+        }
+        
+        .post {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        #loading {
+            text-align: center;
+            margin: 20px;
+        }
+        
+        #backToTop {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Infinite Scroll Posts</h2>
+    <div id="postList"></div>
+    <div id="loading">Loading...</div>
+
+    <button id="backToTop">⬆ Back to top</button>
+
+    <script>
+        const API_URL = "https://jsonplaceholder.typicode.com/posts";
+        const postList = document.getElementById("postList");
+        const loading = document.getElementById("loading");
+        const backToTop = document.getElementById("backToTop");
+
+        let page = 1;
+        const limit = 10;
+        let isLoading = false;
+        let hasMore = true;
+
+        async function loadPosts() {
+            if (isLoading || !hasMore) return;
+
+            isLoading = true;
+            loading.style.display = "block";
+
+            try {
+                const res = await fetch(`${API_URL}?_page=${page}&_limit=${limit}`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    hasMore = false;
+                    loading.textContent = "Hết dữ liệu";
+                    return;
+                }
+
+                renderPosts(data);
+                page++;
+            } catch (err) {
+                loading.textContent = "Lỗi tải dữ liệu";
+            } finally {
+                isLoading = false;
+                loading.style.display = "none";
+            }
+        }
+
+        function renderPosts(posts) {
+            posts.forEach(post => {
+                const div = document.createElement("div");
+                div.className = "post";
+                div.innerHTML = `<h4>${post.title}</h4><p>${post.body}</p>`;
+                postList.appendChild(div);
+            });
+        }
+
+        function handleScroll() {
+            const nearBottom =
+                window.innerHeight + window.scrollY >=
+                document.body.offsetHeight - 200;
+
+            if (nearBottom) loadPosts();
+
+            // Back to top
+            backToTop.style.display = window.scrollY > 600 ? "block" : "none";
+        }
+
+        function throttle(fn, delay) {
+            let last = 0;
+            return function() {
+                const now = Date.now();
+                if (now - last >= delay) {
+                    last = now;
+                    fn();
+                }
+            };
+        }
+
+        window.addEventListener("scroll", throttle(handleScroll, 200));
+
+        backToTop.addEventListener("click", () =>
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            })
+        );
+
+        loadPosts(); // initial load
+    </script>
+
+</body>
+
+</html>

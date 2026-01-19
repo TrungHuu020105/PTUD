@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO List v2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        .task {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        .task.completed {
+            background-color: #d4edda;
+            text-decoration: line-through;
+        }
+        
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>TODO List v2</h2>
+
+    <input type="text" id="taskInput" placeholder="Thêm task mới" />
+    <button onclick="addTask()">Thêm Task</button>
+
+    <div>
+        <button onclick="filterTasks('all')">All</button>
+        <button onclick="filterTasks('active')">Active</button>
+        <button onclick="filterTasks('done')">Done</button>
+    </div>
+
+    <div id="taskList"></div>
+
+    <script>
+        // Kiểm tra và lấy dữ liệu từ localStorage
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks(filteredTasks) {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = ''; // Xóa tất cả task cũ
+            filteredTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.classList.add('task');
+                if (task.completed) taskElement.classList.add('completed');
+
+                taskElement.innerHTML = `
+          <span>${task.text}</span>
+          <button onclick="toggleTaskCompletion(${task.id})">Mark as ${task.completed ? 'Undone' : 'Done'}</button>
+          <button onclick="editTask(${task.id})">Sửa</button>
+          <button onclick="deleteTask(${task.id})">Xóa</button>
+        `;
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const text = taskInput.value.trim();
+            if (!text) return alert('Vui lòng nhập nội dung task!');
+
+            const newTask = {
+                id: Date.now(), // Sử dụng thời gian tạo để làm ID duy nhất
+                text,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks(tasks);
+            taskInput.value = ''; // Xóa nội dung input
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            saveTasks();
+            renderTasks(tasks);
+        }
+
+        function toggleTaskCompletion(id) {
+            const task = tasks.find(task => task.id === id);
+            task.completed = !task.completed;
+            saveTasks();
+            renderTasks(tasks);
+        }
+
+        function editTask(id) {
+            const newText = prompt('Nhập lại nội dung task:');
+            if (newText !== null) {
+                const task = tasks.find(task => task.id === id);
+                task.text = newText;
+                saveTasks();
+                renderTasks(tasks);
+            }
+        }
+
+        function filterTasks(filter) {
+            let filteredTasks;
+            if (filter === 'active') {
+                filteredTasks = tasks.filter(task => !task.completed);
+            } else if (filter === 'done') {
+                filteredTasks = tasks.filter(task => task.completed);
+            } else {
+                filteredTasks = tasks;
+            }
+            renderTasks(filteredTasks);
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Lần đầu render danh sách task
+        renderTasks(tasks);
+    </script>
+
+</body>
+
+</html>

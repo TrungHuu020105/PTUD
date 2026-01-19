@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Random Quote</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .quote {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="quote" id="quote">Bấm Random để bắt đầu</div>
+    <button id="btn">Random</button>
+
+    <script>
+        const quotes = [
+            "Vinh quang lớn nhất trong cuộc sống không nằm ở việc không bao giờ vấp ngã mà nằm ở việc đứng dậy sau mỗi lần vấp ngã.",
+            "Chính trong những khoảnh khắc đen tối nhất, chúng ta phải tập trung để nhìn thấy ánh sáng.",
+            "Bạn sẽ phải đối mặt với nhiều thất bại trong cuộc sống nhưng đừng bao giờ để mình bị đánh bại.",
+            "Nhiều người thất bại trong cuộc sống là do họ không nhận ra rằng họ đã gần thành công đến mức nào khi họ từ bỏ.",
+            "Vinh quang lớn nhất trong cuộc sống không nằm ở việc không bao giờ vấp ngã mà là đứng dậy sau mỗi lần vấp ngã.",
+            "Thành công không phải là cuối cùng; thất bại cũng không gây ra cái chết. Chỉ có lòng dũng cảm để tiếp tục mới là điều quan trọng.",
+            "Thành công thường đến với những người quá bận rộn để tìm kiếm nó.",
+            "Nếu bạn thực sự nhìn kỹ, hầu hết những thành công chỉ sau một đêm đều mất rất nhiều thời gian.",
+            "Bí quyết thành công là làm những việc thông thường một cách xuất sắc.",
+            "Không có bí mật nào dẫn đến thành công. Đó là kết quả của sự chuẩn bị, làm việc chăm chỉ và học hỏi từ thất bại.",
+            "Bài kiểm tra thực sự không phải là liệu bạn có tránh được thất bại này hay không. Mà là liệu bạn có để nó làm mình trở nên cứng rắn hơn hay thất vọng đến mức không tiếp tục hành động? Liệu bạn có học hỏi được từ nó hay không? Và liệu bạn có lựa chọn kiên trì hay không?",
+            "Thà thất bại trong sự độc đáo còn hơn thành công nhờ việc bắt chước.",
+            "Con đường dẫn đến thành công và con đường dẫn đến thất bại gần như giống hệt nhau.",
+            "Jika bạn đặt mục tiêu quá cao và thất bại, bạn sẽ thất bại hơn thành công của người khác.",
+            "Để thành công, bạn phải ích kỷ, nếu không bạn sẽ không bao giờ đạt được thành tựu. Và một khi bạn đã đạt đến thành công cao nhất, bạn buộc phải không ích kỷ.",
+            "Đừng cố gắng trở thành người thành công. Thay vào đó hãy trở thành người có giá trị.",
+            "Thành công là đi từ thất bại này đến thất bại khác mà không mất đi nhiệt huyết.",
+            "Nơi duy nhất mà thành công đứng trước việc làm là trong từ điển.",
+            "Trước bất cứ điều gì, sự chuẩn bị là chìa khóa để thành công.",
+            "Thời gian của bạn là có hạn, vì vậy đừng lãng phí nó để sống cuộc đời của người khác. Đừng bị mắc kẹt bởi giáo điều – tức là sống theo suy nghĩ của người khác.",
+            "Nếu bạn nhìn vào những gì bạn có trong cuộc sống, bạn sẽ luôn có nhiều hơn thế. Nếu bạn nhìn vào những gì bạn không có trong cuộc sống, bạn sẽ thấy không bao giờ có đủ.",
+            "Bạn phải là sự thay đổi mà bạn muốn thấy trên thế giới.",
+            "Bóng tối không thể xua tan bóng tối - chỉ có ánh sáng mới làm được điều đó. Hận thù không thể xua tan hận thù - chỉ có tình yêu mới có thể làm được điều đó.",
+            "Mỗi ngày hãy làm một việc mà bình thường bạn sợ hãi nó.",
+            "Làm giỏi hơn nói hay.",
+            "Cuối cùng, số năm tháng trong cuộc đời bạn không phải là điều quan trọng. Điều quan trọng là cuộc sống trong những năm tháng của bạn.",
+            "Nếu cuộc sống có thể đoán trước được thì nó sẽ không còn là cuộc sống và không có hương vị.",
+            "Cuộc sống là một chuỗi những bài học phải sống mới hiểu được.",
+            "Cuộc sống không bao giờ công bằng, và có lẽ điều đó không công bằng đối với hầu hết chúng ta.",
+            "Chỉ có cuộc đời sống vì người khác mới là cuộc đời đáng giá."
+
+        ];
+
+        let shuffledQuotes = [];
+        let index = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initQuotes() {
+            shuffledQuotes = shuffle([...quotes]);
+            index = 0;
+        }
+
+        function saveViewedQuote(quote) {
+            const viewed = JSON.parse(localStorage.getItem("viewedQuotes")) || [];
+            viewed.push(quote);
+            localStorage.setItem("viewedQuotes", JSON.stringify(viewed));
+        }
+
+        function showRandomQuote() {
+            if (index >= shuffledQuotes.length) {
+                initQuotes(); // hết → shuffle lại
+            }
+
+            const quote = shuffledQuotes[index];
+            document.getElementById("quote").textContent = quote;
+            saveViewedQuote(quote);
+            index++;
+        }
+
+        initQuotes();
+        document.getElementById("btn").addEventListener("click", showRandomQuote);
+    </script>
+
+</body>
+
+</html>

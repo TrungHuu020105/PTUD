@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Register Form</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 400px;
+            margin: 40px auto;
+        }
+        
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        
+        .error {
+            color: red;
+            font-size: 13px;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+        }
+        
+        button:disabled {
+            background: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Đăng ký</h2>
+
+    <input id="email" placeholder="Email" />
+    <div class="error" id="emailError"></div>
+
+    <input id="password" type="password" placeholder="Password" />
+    <div class="error" id="passwordError"></div>
+
+    <input id="confirm" type="password" placeholder="Confirm Password" />
+    <div class="error" id="confirmError"></div>
+
+    <input id="phone" placeholder="Phone" />
+    <div class="error" id="phoneError"></div>
+
+    <button id="submitBtn" disabled>Submit</button>
+
+    <script>
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const PHONE_REGEX = /^(0|\+84)[0-9]{9}$/;
+        const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+        const confirm = document.getElementById("confirm");
+        const phone = document.getElementById("phone");
+        const submitBtn = document.getElementById("submitBtn");
+
+        function validateEmail() {
+            if (!EMAIL_REGEX.test(email.value)) {
+                emailError.textContent = "Email không hợp lệ";
+                return false;
+            }
+            emailError.textContent = "";
+            return true;
+        }
+
+        function validatePassword() {
+            if (!PASSWORD_REGEX.test(password.value)) {
+                passwordError.textContent =
+                    "Mật khẩu ≥8 ký tự, có chữ hoa và số";
+                return false;
+            }
+            passwordError.textContent = "";
+            return true;
+        }
+
+        function validateConfirm() {
+            if (confirm.value !== password.value) {
+                confirmError.textContent = "Mật khẩu không khớp";
+                return false;
+            }
+            confirmError.textContent = "";
+            return true;
+        }
+
+        function validatePhone() {
+            if (!PHONE_REGEX.test(phone.value)) {
+                phoneError.textContent = "Số điện thoại không hợp lệ";
+                return false;
+            }
+            phoneError.textContent = "";
+            return true;
+        }
+
+        function checkFormValid() {
+            const isValid =
+                validateEmail() &&
+                validatePassword() &&
+                validateConfirm() &&
+                validatePhone();
+
+            submitBtn.disabled = !isValid;
+        }
+
+        email.addEventListener("input", checkFormValid);
+        password.addEventListener("input", checkFormValid);
+        confirm.addEventListener("input", checkFormValid);
+        phone.addEventListener("input", checkFormValid);
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-top: 20px;
+        }
+        
+        .timer {
+            font-size: 48px;
+            margin: 30px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        
+        .pause {
+            background-color: yellow;
+        }
+        
+        .reset {
+            background-color: red;
+        }
+        
+        .start {
+            background-color: green;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Pomodoro Timer</h1>
+    <div class="timer" id="timerDisplay">25:00</div>
+
+    <button id="startBtn" class="start">Start</button>
+    <button id="pauseBtn" class="pause" disabled>Pause</button>
+    <button id="resetBtn" class="reset">Reset</button>
+
+    <audio id="audio" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+    <script>
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const audio = document.getElementById('audio');
+
+        let interval;
+        let isRunning = false;
+        let timeRemaining = 25 * 60; // 25 minutes in seconds
+        let endTime = 0; // Used for calculating remaining time
+        let isBreak = false; // False means focus, True means break
+
+        // Load previous state from localStorage
+        function loadState() {
+            const savedState = JSON.parse(localStorage.getItem('pomodoroState'));
+            if (savedState) {
+                timeRemaining = savedState.timeRemaining;
+                isRunning = savedState.isRunning;
+                isBreak = savedState.isBreak;
+                endTime = savedState.endTime;
+                updateDisplay();
+                if (isRunning) {
+                    startTimer();
+                }
+            }
+        }
+
+        // Save current state to localStorage
+        function saveState() {
+            const state = {
+                timeRemaining,
+                isRunning,
+                isBreak,
+                endTime
+            };
+            localStorage.setItem('pomodoroState', JSON.stringify(state));
+        }
+
+        // Format time in mm:ss
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secondsRemaining = seconds % 60;
+            return `${minutes < 10 ? '0' : ''}${minutes}:${secondsRemaining < 10 ? '0' : ''}${secondsRemaining}`;
+        }
+
+        // Update the timer display
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeRemaining);
+        }
+
+        // Start the timer (countdown)
+        function startTimer() {
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+            isRunning = true;
+            endTime = Date.now() + timeRemaining * 1000;
+            interval = setInterval(() => {
+                timeRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                updateDisplay();
+                if (timeRemaining === 0) {
+                    clearInterval(interval);
+                    audio.play();
+                    if (isBreak) {
+                        isBreak = false;
+                        timeRemaining = 25 * 60; // Reset to focus time
+                        startTimer();
+                    } else {
+                        isBreak = true;
+                        timeRemaining = 5 * 60; // Set to break time
+                        startTimer();
+                    }
+                }
+                saveState(); // Save state on every tick
+            }, 1000);
+        }
+
+        // Pause the timer
+        function pauseTimer() {
+            clearInterval(interval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = false;
+            isRunning = false;
+            saveState();
+        }
+
+        // Reset the timer
+        function resetTimer() {
+            clearInterval(interval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            isRunning = false;
+            isBreak = false;
+            timeRemaining = 25 * 60; // Reset to focus time
+            updateDisplay();
+            localStorage.removeItem('pomodoroState');
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // On load, try to load saved state
+        loadState();
+    </script>
+</body>
+
+</html>

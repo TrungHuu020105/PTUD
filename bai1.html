@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máy Tính Mini</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .calculator {
+            margin: 20px auto;
+            width: 200px;
+            text-align: center;
+        }
+        
+        input,
+        button {
+            margin: 10px 0;
+            padding: 8px;
+            width: 80%;
+        }
+        
+        .result {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <input type="number" id="num1" placeholder="Nhập số thứ nhất" />
+        <input type="number" id="num2" placeholder="Nhập số thứ hai" />
+        <select id="operator">
+      <option value="+">+</option>
+      <option value="-">-</option>
+      <option value="*">×</option>
+      <option value="/">÷</option>
+    </select>
+        <button id="calculate">Tính</button>
+        <p class="result" id="result"></p>
+    </div>
+
+    <script>
+        // Hàm validate input và xử lý chia cho 0
+        function validateAndCalculate(num1, num2, operator) {
+            if (isNaN(num1) || isNaN(num2)) {
+                return "Vui lòng nhập cả hai số hợp lệ.";
+            }
+            if (operator === "/" && num2 === 0) {
+                return "Không thể chia cho 0!";
+            }
+
+            switch (operator) {
+                case "+":
+                    return num1 + num2;
+                case "-":
+                    return num1 - num2;
+                case "*":
+                    return num1 * num2;
+                case "/":
+                    return num1 / num2;
+                default:
+                    return "Phép toán không hợp lệ.";
+            }
+        }
+
+        // Hàm tính toán khi bấm nút "Tính"
+        function calculate() {
+            const num1 = parseFloat(document.getElementById("num1").value);
+            const num2 = parseFloat(document.getElementById("num2").value);
+            const operator = document.getElementById("operator").value;
+
+            const result = validateAndCalculate(num1, num2, operator);
+            document.getElementById("result").textContent = result;
+        }
+
+        // Xử lý sự kiện bấm nút "Tính"
+        document.getElementById("calculate").addEventListener("click", calculate);
+
+        // Xử lý sự kiện nhập phím Enter
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                calculate();
+            }
+        });
+    </script>
+</body>
+
+</html>
